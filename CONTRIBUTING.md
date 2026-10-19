@@ -4,7 +4,7 @@ Thank you for your interest in TreeDock.
 
 ## Current status: external contributions are on hold
 
-Every external contribution requires a signed [Contributor Licence Agreement](CLA.md). CLA enforcement through [PactDock](https://github.com/ASPEC-RACING-PTY-LTD/PactDock) is configured, but it stays switched off until the agreements have passed legal review.
+Every external contribution requires a signed [Contributor Licence Agreement](CLA.md). The agreements are final, and CLA enforcement through [PactDock](https://github.com/ASPEC-RACING-PTY-LTD/PactDock) is configured. It is not switched on yet.
 
 Until it is switched on:
 

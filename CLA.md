@@ -1,7 +1,7 @@
 # Contributor Licence Agreement (CLA)
 
-> **Status: the agreements are drafts pending legal review, and CLA enforcement is not yet switched on.**
-> External pull requests cannot be merged until ASPEC RACING PTY LTD approves the agreements and enables PactDock for this repository.
+> **Status: the agreements are final (version 1.0). CLA enforcement is configured but not yet switched on.**
+> External pull requests cannot be merged until ASPEC RACING PTY LTD enables PactDock for this repository.
 
 ## Why TreeDock requires a CLA
 
@@ -17,16 +17,17 @@ To include a contribution in those editions, ASPEC needs broader rights than the
 | ASPEC Individual Contributor Licence Agreement 1.0 | You contribute on your own behalf | [.github/cla/ASPEC-ICLA-1.0.md](.github/cla/ASPEC-ICLA-1.0.md) |
 | ASPEC Entity Contributor Licence Agreement 1.0 | You contribute on behalf of an employer or other organisation | [.github/cla/ASPEC-ECLA-1.0.md](.github/cla/ASPEC-ECLA-1.0.md) |
 
-These are ASPEC's own agreements, modelled on the structure of the [Harmony Agreements](https://www.harmonyagreements.org/agreements). They are shared across ASPEC projects and maintained with [PactDock](https://github.com/ASPEC-RACING-PTY-LTD/PactDock). In summary:
+These are ASPEC's own agreements, modelled on the [Harmony Agreements](https://www.harmonyagreements.org/agreements), including Harmony's "Option Five" outbound licence. They are shared across ASPEC projects and maintained with [PactDock](https://github.com/ASPEC-RACING-PTY-LTD/PactDock). In summary:
 
 - **You keep ownership** of your contributions.
 - **The rights ASPEC RACING PTY LTD receives:**
   - A perpetual, worldwide, irrevocable, royalty-free, transferable and sublicensable licence to use, modify, distribute and commercially exploit your contributions.
   - The right to relicense them under any terms, including commercial and proprietary licences, without asking again.
+- **ASPEC's promise to you:** if ASPEC releases your contribution, it will also license it under the licence TreeDock had on the date you submitted it. That is the PolyForm Noncommercial License 1.0.0 today.
 - **A patent licence** and an Australian moral-rights consent.
 - **Independent forks** do not have to grant their changes back to ASPEC. The CLA applies only to contributions submitted to TreeDock.
 
-The agreement text is what applies. This summary is not legal advice.
+The agreement text is what applies.
 
 ## How signing will work
 

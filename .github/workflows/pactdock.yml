@@ -1,16 +1,17 @@
 # PactDock CLA enforcement (MASTER_PLAN 11.4, milestone PD).
-# Based on https://github.com/ASPEC-RACING-PTY-LTD/PactDock/blob/b1a8809e8c9b268af6bdcb6d0ebf6f34b9bee9a9/examples/workflows/pactdock.yml
+# Based on https://github.com/ASPEC-RACING-PTY-LTD/PactDock/blob/babe7514a8910bf18adabdf0e15d4084e610f292/examples/workflows/pactdock.yml
 #
 # Security notes (from PactDock's setup guide)
 # - pull_request_target and issue_comment always run this file from the DEFAULT
 #   BRANCH, so a pull request cannot alter it.
 # - There is deliberately no actions/checkout step: PactDock reads PR metadata
 #   through the API and never runs contributor code.
-# - PactDock is pinned to a full commit SHA (main as of 2026-10-20).
+# - PactDock is pinned to a full commit SHA (main as of 2026-10-20, after the
+#   ASPEC CLAs were finalised).
 #
 # Enablement: the job runs only when the repository (or organisation) variable
-# PACTDOCK_ENABLED is "true". Leave it unset until the ASPEC CLA drafts in
-# .github/cla/ have passed legal review.
+# PACTDOCK_ENABLED is "true". Set it once the PactDock GitHub App, its
+# credentials and the private signature store are in place.
 name: PactDock CLA
 
 on:
@@ -46,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: ASPEC-RACING-PTY-LTD/PactDock@b1a8809e8c9b268af6bdcb6d0ebf6f34b9bee9a9 # main 2026-10-20 (v1.0.0)
+      - uses: ASPEC-RACING-PTY-LTD/PactDock@babe7514a8910bf18adabdf0e15d4084e610f292 # main 2026-10-20 (v1.0.0, final CLAs)
         with:
           app-id: ${{ vars.PACTDOCK_APP_ID }}
           app-private-key: ${{ secrets.PACTDOCK_APP_PRIVATE_KEY }}
