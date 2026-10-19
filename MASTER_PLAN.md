@@ -1293,6 +1293,8 @@ CLA enforcement is ASPEC's own tooling, set up and run by ASPEC **entirely outsi
 | **CLI-only ZIP** | For servers and scripting |
 | **MSIX / Store** | Not planned for 1.0 (sandbox and identity constraints). Revisit with the sparse package work |
 
+**Release automation (added 2026-10-20).** Pushing a tag `vX.Y.Z` runs `.github/workflows/release.yml`, which tests the engine, builds the x64 portable ZIP and the Inno Setup installer (per-user by default, all-users optional), and publishes them with `SHA256SUMS.txt` as a GitHub release. Versions start at 0.1.0, PATCH is a single digit (0.1.9 is followed by 0.2.0), and the app and engine versions must match the tag; `tools/version.py` enforces this. ARM64, the CLI-only ZIP and code signing are not automated yet. Process: `RELEASING.md`.
+
 **Windows 10 support.**
 - WinAppSDK requires Windows 10 1809+ [C].
 - Mainstream Windows 10 support ended 14 Oct 2025, and consumer ESU ended 13 Oct 2026 [K]. Windows 10 22H2 is therefore supported **on a best-effort basis**: CI-tested and bug fixes accepted, but no new Windows 10-specific features.

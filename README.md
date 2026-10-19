@@ -4,6 +4,15 @@ TreeDock is a fast, accurate disk-space analyser for Windows. It shows where you
 
 > **Status:** early development. See [MASTER_PLAN.md](MASTER_PLAN.md) for the architecture and roadmap.
 
+## Download
+
+Get the latest build from [GitHub Releases](https://github.com/ASPEC-RACING-PTY-LTD/TreeDock/releases):
+
+- `TreeDock-<version>-x64-setup.exe` installs for the current user (no admin needed).
+- `TreeDock-<version>-x64-portable.zip` runs from any folder.
+
+Requires Windows 10 1809 or later (x64). Builds are not code-signed yet, so SmartScreen may warn on first run.
+
 ## What works today
 
 - **Desktop app (WinUI 3, preview).**

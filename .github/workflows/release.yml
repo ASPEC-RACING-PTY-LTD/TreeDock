@@ -1,0 +1,75 @@
+# Builds the Windows app and publishes a GitHub release when a version tag is pushed.
+# Tags: v0.1.0 onwards; PATCH is a single digit (v0.1.9 is followed by v0.2.0).
+# See RELEASING.md and tools/version.py.
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  windows-x64:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check the tag
+        id: version
+        shell: pwsh
+        run: |
+          python tools/version.py check "${{ github.ref_name }}"
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          "version=$('${{ github.ref_name }}'.Substring(1))" >> $env:GITHUB_OUTPUT
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Tools
+        shell: pwsh
+        run: |
+          # Native AOT finds the C++ toolchain through vswhere.
+          "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer" >> $env:GITHUB_PATH
+          if (-not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) {
+            choco install innosetup -y --no-progress
+            if ($LASTEXITCODE -ne 0) { exit 1 }
+          }
+          rustup show active-toolchain
+
+      - name: Test engine
+        working-directory: engine
+        run: cargo test --release --locked
+
+      - name: Build release
+        shell: pwsh
+        run: ./tools/build_release.ps1 -Version ${{ steps.version.outputs.version }} -Arch x64
+
+      - name: Publish release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $v = '${{ steps.version.outputs.version }}'
+          @"
+          ## Download
+
+          - **Installer:** ``TreeDock-$v-x64-setup.exe``. Installs for the current user (no admin needed); the setup dialog also offers an all-users install.
+          - **Portable:** ``TreeDock-$v-x64-portable.zip``. Extract anywhere and run ``TreeDock.exe``. Includes ``treedock-cli.exe``.
+
+          Requires Windows 10 1809 or later (x64). The files are not code-signed yet, so Windows SmartScreen may warn on first run: choose **More info → Run anyway**. Check downloads against ``SHA256SUMS.txt``.
+
+          TreeDock is free for personal and noncommercial use under the PolyForm Noncommercial License 1.0.0. Commercial use needs a licence from ASPEC RACING PTY LTD.
+          "@ | Set-Content -Encoding utf8 notes.md
+          gh release create "${{ github.ref_name }}" (Get-ChildItem dist -File).FullName `
+            --title "TreeDock $v" --notes-file notes.md --generate-notes --verify-tag
+          if ($LASTEXITCODE -ne 0) { exit 1 }
