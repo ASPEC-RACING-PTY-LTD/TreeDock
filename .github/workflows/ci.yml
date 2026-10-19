@@ -1,4 +1,4 @@
-# Build, lint and test only. CLA enforcement lives in pactdock.yml
+# Build, lint and test only. CLA enforcement is separate and not part of CI
 # (MASTER_PLAN §11.4).
 name: ci
 

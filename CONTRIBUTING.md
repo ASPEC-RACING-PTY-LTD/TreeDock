@@ -4,9 +4,9 @@ Thank you for your interest in TreeDock.
 
 ## Current status: external contributions are on hold
 
-Every external contribution requires a signed [Contributor Licence Agreement](CLA.md). The agreements are final, and CLA enforcement through [PactDock](https://github.com/ASPEC-RACING-PTY-LTD/PactDock) is configured. It is not switched on yet.
+Every external contribution requires a signed [Contributor Licence Agreement](CLA.md). The agreements are final. CLA signing is not switched on yet.
 
-Until it is switched on:
+Until it is:
 
 - You can open issues, report bugs and suggest features.
 - You can open pull requests for discussion, but they **cannot be merged**.
@@ -18,7 +18,7 @@ TreeDock is **source-available** under the [PolyForm Noncommercial License 1.0.0
 
 By signing the CLA, you will keep ownership of your contribution and grant ASPEC RACING PTY LTD the rights described in [CLA.md](CLA.md).
 
-Once enforcement is on, PactDock checks each pull request automatically and tells you how to sign by posting a comment. Pull requests can only be merged when the `PactDock CLA` check passes.
+Once signing is switched on, each pull request will be checked automatically and you will be told how to sign. Pull requests will only be mergeable once every contributor is covered.
 
 ## Development
 

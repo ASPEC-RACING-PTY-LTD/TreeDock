@@ -56,4 +56,4 @@ PolyForm Noncommercial is not an OSI-approved open-source licence, so please don
 
 All external contributions require a signed Contributor Licence Agreement. See [CONTRIBUTING.md](CONTRIBUTING.md) and [CLA.md](CLA.md).
 
-CLA signing is handled by [PactDock](https://github.com/ASPEC-RACING-PTY-LTD/PactDock). **External pull requests can't be merged yet:** enforcement is configured but not switched on.
+**External pull requests can't be merged yet:** CLA signing is not switched on.

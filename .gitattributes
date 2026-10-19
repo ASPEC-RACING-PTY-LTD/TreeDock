@@ -1,2 +1,2 @@
-# Agreement texts are hash-pinned in .github/pactdock.json: keep them byte-identical (LF).
+# Agreement texts must stay byte-identical to the published versions (LF).
 .github/cla/*.md text eol=lf

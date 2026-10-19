@@ -1,6 +1,6 @@
 # TreeDock — Master Plan
 
-**Status:** Plan v3. Licensing and CLA decisions finalised; ASPEC CLAs v1.0 final; PactDock integrated, awaiting activation (§11.4); implementation in progress (see §12).
+**Status:** Plan v3. Licensing and CLA decisions finalised; ASPEC CLAs v1.0 final; CLA enforcement run by ASPEC outside the repository (§11.4); implementation in progress (see §12).
 **Owner:** ASPEC RACING PTY LTD (Australia)
 **Date:** 2026-10-20
 **Scope:** This document covers research, architecture and the roadmap. Implementation starts only after the plan is approved.
@@ -1149,7 +1149,7 @@ An independent PowerShell or script-based sum over a fixture volume, plus `fsuti
     - `SOURCE_DATE_EPOCH`-style deterministic flags where supported
   - Bit-for-bit reproducibility of the .NET/WinUI output is **not guaranteed** [A]. The goal is to document the build so anyone can verify it from source.
 - **Docs:** README, user guide (size definitions, scan modes, safety), architecture doc, ADRs, `CONTRIBUTING.md`, `CLA.md`, `SECURITY.md` (private vulnerability reporting).
-- **CLA enforcement is separate from CI.** `ci.yml` contains build, test, lint and audit jobs only. CLA checks come exclusively from PactDock in `pactdock.yml` (§11.4, milestone PD).
+- **CLA enforcement is separate from CI.** `ci.yml` contains build, test, lint and audit jobs only. CLA checks are run by ASPEC outside the repository (§11.4, milestone PD).
 
 ---
 
@@ -1206,9 +1206,9 @@ An independent PowerShell or script-based sum over a fixture volume, plus `fsuti
 |---|---|---|
 | `LICENSE.md` | Verbatim PolyForm Noncommercial 1.0.0 text | Added (verbatim, SHA-256 `c0ea4a89…fabbe5` of the upstream 1.0.0 file) |
 | `NOTICE` | `Required Notice: Copyright (c) 2026 ASPEC RACING PTY LTD` | Added |
-| `CLA.md` | Explains the CLA requirement, links the ASPEC Individual and Entity agreements in `.github/cla/`, summarises them (including ASPEC's Option Five promise) and describes PactDock signing | Updated for PactDock |
-| `.github/cla/ASPEC-ICLA-1.0.md`, `ASPEC-ECLA-1.0.md` | ASPEC's final v1.0 agreements, copied verbatim from PactDock `templates/cla/` at commit `babe751` and hash-pinned in `.github/pactdock.json` | Added |
-| `CONTRIBUTING.md` | Contribution workflow, coding/testing standards, and the CLA requirement. States that external pull requests **cannot be merged until enforcement is switched on** | Updated |
+| `CLA.md` | Explains the CLA requirement, links the ASPEC Individual and Entity agreements in `.github/cla/`, summarises them (including ASPEC's Option Five promise) and describes how signing works | Updated |
+| `.github/cla/ASPEC-ICLA-1.0.md`, `ASPEC-ECLA-1.0.md` | ASPEC's final v1.0 agreements, verbatim | Added |
+| `CONTRIBUTING.md` | Contribution workflow, coding/testing standards, and the CLA requirement. States that external pull requests **cannot be merged until enforcement is installed** | Updated |
 | `README.md` | Plain-language licence section (who may use it free, who needs a commercial licence from ASPEC), "source-available, not open source" wording, link to `CLA.md` | Added |
 | `THIRD_PARTY_NOTICES` | Licences of all bundled dependencies, generated in CI (`cargo about` or equivalent, plus NuGet licences) | Phase 1 release work |
 | SPDX headers | `SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0` on source files | Applied as files are created |
@@ -1255,7 +1255,7 @@ An independent PowerShell or script-based sum over a fixture volume, plus `fsuti
 - `[JURISDICTION]`
 - signatory details
 
-**Agreements adopted (final, 2026-10-20).** TreeDock uses ASPEC's shared agreements, maintained in the PactDock repository (`templates/cla/`, commit `babe751`):
+**Agreements adopted (final, 2026-10-20).** TreeDock uses ASPEC's shared agreements:
 - *ASPEC Individual Contributor Licence Agreement 1.0* (`.github/cla/ASPEC-ICLA-1.0.md`)
 - *ASPEC Entity Contributor Licence Agreement 1.0* (`.github/cla/ASPEC-ECLA-1.0.md`)
 
@@ -1273,45 +1273,15 @@ They are independently worded and modelled on Harmony. The key clauses for TreeD
 
 The entity agreement adds Affiliates, signatory authority and maintainer verification (Schedule 1).
 
-Changing an agreement means: update it in PactDock, copy it here verbatim, and update its `sha256` pin. Bump the version if anyone has already signed.
+Changing an agreement means: publish the new version where ASPEC manages agreements and copy it here verbatim. Bump the version if anyone has already signed.
 
-### 11.4 CLA enforcement: PactDock (integrated, awaiting activation)
+### 11.4 CLA enforcement
 
-**PactDock** (https://github.com/ASPEC-RACING-PTY-LTD/PactDock) is ASPEC's own CLA enforcement GitHub Action. It is the **only** CLA enforcement used by TreeDock. ASPEC authorised integration on 2026-10-20.
-
-**How it works** (from PactDock's README and setup guide):
-1. On each pull request, PactDock identifies every contributor by numeric GitHub account ID: the PR author, commit authors and `Co-authored-by:` identities.
-2. It posts a `PactDock CLA` commit status and one instruction comment.
-3. Contributors sign by commenting the exact acceptance phrase. PactDock verifies the comment and appends a record to a **private** signature repository.
-4. Entity coverage becomes active only after a maintainer verifies the signatory.
-5. Merges are blocked by requiring the `PactDock CLA` status in a ruleset.
-
-**What is in the TreeDock repository:**
-
-| File | Purpose |
-|---|---|
-| `.github/pactdock.json` | Rights holder; ICLA and ECLA with SHA-256 pins; store `ASPEC-RACING-PTY-LTD/cla-signatures`; bot allowlist (dependabot, github-actions); co-authors must sign. Validated with PactDock's own parser |
-| `.github/workflows/pactdock.yml` | PactDock's example workflow, with the following changes: pinned to commit `babe7514a8910bf18adabdf0e15d4084e610f292`, GitHub App mode with `permissions: contents: read`, no checkout, and the job gated on the variable `PACTDOCK_ENABLED == 'true'` |
-| `.github/cla/*.md` | The agreement texts the signing phrase refers to |
-| `.gitattributes` | Keeps the agreement files LF so the hash pins stay valid |
-
-**Design decisions:**
-- **GitHub App authentication** (PactDock's recommendation). Statuses come from the App, so the required check can be pinned to it. Tokens are short-lived and scoped to one repository.
-- **Separate private signature store.** TreeDock is a public repository, so self-storage would publish signers' account IDs and comments.
-- **Off until configured.** The workflow does nothing until `PACTDOCK_ENABLED` is set, so it cannot fail on every PR before the App, secrets and store exist.
-
-**Remaining owner actions** (none can be done from the code, and they require credentials or GitHub admin rights):
-1. Create the private store `ASPEC-RACING-PTY-LTD/cla-signatures`. It must not be public. Give it a README so it has a default branch, and protect `main`.
-2. Create and install the PactDock GitHub App on TreeDock and on the store. PactDock's `docs/SETUP.md` §3 lists the required permissions.
-3. Set organisation or repository variable `PACTDOCK_APP_ID` and secret `PACTDOCK_APP_PRIVATE_KEY`.
-4. Push TreeDock to `ASPEC-RACING-PTY-LTD/TreeDock`.
-5. Run the verification steps in PactDock `SETUP.md` §7 on a test PR, then set `PACTDOCK_ENABLED=true`.
-6. Add a ruleset on `main`: require the `PactDock CLA` status with the source set to the PactDock App; require pull requests; block force pushes.
+CLA enforcement is ASPEC's own tooling, set up and run by ASPEC **entirely outside this repository**. It needs no files, workflows or code in TreeDock. ASPEC handles the setup, the GitHub App installation, signature storage and the ruleset that requires the CLA check on `main`.
 
 **Rules:**
-- No other CLA tool (e.g. CLA Assistant) or interim enforcement is added.
-- Updating PactDock means reviewing the new commit and changing the pinned SHA deliberately.
-- PactDock is not on the critical path of any TreeDock development phase (§12).
+- No other CLA tool (e.g. CLA Assistant) or interim enforcement is added to the repository.
+- CLA enforcement is not on the critical path of any TreeDock development phase (§12).
 
 ### 11.5 Distribution
 
@@ -1475,20 +1445,17 @@ Each phase ends with a tagged pre-release and an acceptance review. Durations ar
 - External accessibility review (or documented manual audit) is complete.
 - The release is reproducible from tag following the documented steps.
 
-### Milestone PD — PactDock CLA enforcement (repository side DONE; activation PENDING owner actions)
+### Milestone PD — CLA enforcement (repository side DONE; activation by ASPEC)
 
-**Done (2026-10-20, authorised by ASPEC):**
-- PactDock config, pinned workflow and agreement texts added (§11.4).
-- `CLA.md`, `CONTRIBUTING.md` and `README.md` updated.
-- Config validated with PactDock's own parser; hash pins verified.
+**Done:** agreement texts (`.github/cla/`) and `CLA.md`, `CONTRIBUTING.md`, `README.md`. No enforcement files are needed in the repository.
 
-**Pending:** the owner actions listed in §11.4 (store repository, GitHub App, secrets, push, ruleset, `PACTDOCK_ENABLED`).
+**Pending:** ASPEC sets up enforcement and the ruleset (§11.4).
 
 **Acceptance:**
 - An external PR from a contributor without a valid CLA cannot be merged.
 - An Individual signer and an Entity-covered signer can both be verified.
 - Signature records appear in the private store.
-- No third-party CLA tool exists anywhere in the repository.
+- No third-party CLA tool is used.
 
 **Non-blocking:** no other phase depends on PD.
 
@@ -1498,7 +1465,7 @@ Each phase ends with a tagged pre-release and an acceptance review. Durations ar
 P0 ─► P1 ─► P2 ──────────────┐
        └──► P3 ─► P4 ─► P5 ◄─┘ ─► P6
 
-PD (PactDock; integrated, awaiting activation) ─► enables merging external contributions
+PD (CLA enforcement; set up by ASPEC) ─► enables merging external contributions
 ```
 
 ---
@@ -1519,14 +1486,14 @@ PD (PactDock; integrated, awaiting activation) ─► enables merging external c
 | R8 | Cloud placeholders get hydrated by accident (e.g. duplicate hashing, Properties) | Medium / High | A central rule in the engine: any open of a file with RECALL attributes is refused unless the user explicitly chooses it. Tested with a Cloud Files test provider |
 | R9 | ReFS block clone / dedup makes totals look "wrong" | High / Low–Medium | Label it explicitly. Reconciliation panel. Documentation |
 | R10 | SmartScreen warnings reduce adoption | High / Medium | Free OSS signing programmes are likely closed to a noncommercial licence (§11.1), so budget for a paid option (e.g. Azure Trusted Signing [A]). Publish checksums |
-| R12 | The noncommercial licence limits adoption and contributions: no workplace use, no "open source" listings, CLA friction, and the engine can't be reused | High / Medium | Plain-language README licence section. Clear process for commercial-licence enquiries, if the owner wants to offer one. CLA enforcement via ASPEC's PactDock (§11.4). Revisit the licence before 1.0 if contributor uptake is poor |
+| R12 | The noncommercial licence limits adoption and contributions: no workplace use, no "open source" listings, CLA friction, and the engine can't be reused | High / Medium | Plain-language README licence section. Clear process for commercial-licence enquiries, if the owner wants to offer one. CLA enforcement run by ASPEC (§11.4). Revisit the licence before 1.0 if contributor uptake is poor |
 | R11 | Windows 10 end of support limits testing hardware and APIs | Medium / Low | Best-effort support tier. CI on Windows Server 2022 (Win10 kernel family) [A] |
 
 ### 13.2 Unresolved questions (and how they get resolved)
 
 | # | Question | Resolution path |
 |---|---|---|
-| Q1 | ~~CLA vs DCO~~ **Resolved: CLA** (Harmony HA-CLA-I/E, Option Five, §11.3). Agreements final: ASPEC ICLA/ECLA 1.0 with Option Five (§11.3). Still open: (a) PactDock activation (§11.4 owner actions), (b) ASPEC's commercial-licence terms and process | ASPEC. Neither blocks engine/UI development |
+| Q1 | ~~CLA vs DCO~~ **Resolved: CLA** (Harmony HA-CLA-I/E, Option Five, §11.3). Agreements final: ASPEC ICLA/ECLA 1.0 with Option Five (§11.3). Still open: (a) CLA enforcement activation by ASPEC (§11.4), (b) ASPEC's commercial-licence terms and process | ASPEC. Neither blocks engine/UI development |
 | Q2 | Does `FSCTL_ENUM_USN_DATA` emit one record per hard link? (Matters only if it is used for tree-building) | P0-1 experiment |
 | Q3 | Does `AllocationSize` from directory enumeration reflect WOF (CompactOS) compression, or is a per-file query needed? | P0-1/P2 experiment on a CompactOS VM |
 | Q4 | Is `FSCTL_READ_UNPRIVILEGED_USN_JOURNAL` usable for non-admin incremental refresh? It is not documented on Learn | P5 experiment. Assume no until proven |
@@ -1554,7 +1521,7 @@ PD (PactDock; integrated, awaiting activation) ─► enables merging external c
 | Custom columnar `.tdsnap` (zstd) + small SQLite for history | Fast bulk save/load. SQLite where queries matter (trends) |
 | Size-then-partial-then-full (BLAKE3) duplicate pipeline | Avoids reading most bytes. Never claims identity without a full hash |
 | Recycle by default, re-validation, protected paths, no automatic actions | Safety requirement |
-| CLA required for all external contributions: ASPEC ICLA/ECLA 1.0 (Harmony-modelled, Option Five); enforcement via PactDock (integrated, awaiting activation) | ASPEC keeps commercial and relicensing rights in accepted contributions while contributors keep ownership (§11.3–11.4) |
+| CLA required for all external contributions: ASPEC ICLA/ECLA 1.0 (Harmony-modelled, Option Five); enforcement run by ASPEC outside the repository | ASPEC keeps commercial and relicensing rights in accepted contributions while contributors keep ownership (§11.3–11.4) |
 | PolyForm Noncommercial 1.0.0 (owner decision, licensor ASPEC RACING PTY LTD) | Free for personal and noncommercial use, source published, and it stops others exploiting the software commercially. Accepted trade-offs: not OSI open source, no commercial use, no copyleft dependencies (§11.1) |
 
 ---

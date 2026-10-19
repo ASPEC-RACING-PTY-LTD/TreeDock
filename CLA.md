@@ -1,7 +1,7 @@
 # Contributor Licence Agreement (CLA)
 
-> **Status: the agreements are final (version 1.0). CLA enforcement is configured but not yet switched on.**
-> External pull requests cannot be merged until ASPEC RACING PTY LTD enables PactDock for this repository.
+> **Status: the agreements are final (version 1.0). CLA signing is not switched on yet.**
+> External pull requests cannot be merged until ASPEC RACING PTY LTD switches on CLA signing for this repository.
 
 ## Why TreeDock requires a CLA
 
@@ -17,7 +17,7 @@ To include a contribution in those editions, ASPEC needs broader rights than the
 | ASPEC Individual Contributor Licence Agreement 1.0 | You contribute on your own behalf | [.github/cla/ASPEC-ICLA-1.0.md](.github/cla/ASPEC-ICLA-1.0.md) |
 | ASPEC Entity Contributor Licence Agreement 1.0 | You contribute on behalf of an employer or other organisation | [.github/cla/ASPEC-ECLA-1.0.md](.github/cla/ASPEC-ECLA-1.0.md) |
 
-These are ASPEC's own agreements, modelled on the [Harmony Agreements](https://www.harmonyagreements.org/agreements), including Harmony's "Option Five" outbound licence. They are shared across ASPEC projects and maintained with [PactDock](https://github.com/ASPEC-RACING-PTY-LTD/PactDock). In summary:
+These are ASPEC's own agreements, modelled on the [Harmony Agreements](https://www.harmonyagreements.org/agreements), including Harmony's "Option Five" outbound licence. They are shared across ASPEC projects. In summary:
 
 - **You keep ownership** of your contributions.
 - **The rights ASPEC RACING PTY LTD receives:**
@@ -31,17 +31,4 @@ The agreement text is what applies.
 
 ## How signing will work
 
-Signing is handled by **PactDock**, ASPEC's CLA tool, which runs as a GitHub Action on this repository.
-
-1. When you open a pull request, PactDock checks every contributor. That includes the PR author, each commit author and each `Co-authored-by:` identity.
-2. If anyone has not signed, the `PactDock CLA` check fails. PactDock then posts a comment with instructions.
-3. To sign the individual agreement, post this exact sentence as a **new** comment on the pull request:
-
-   ```text
-   I have read and agree to the ASPEC Individual Contributor Licence Agreement version 1.0.
-   ```
-
-4. For an organisation, an authorised signatory posts the entity sentence shown in PactDock's comment. A maintainer then verifies their authority before entity coverage becomes active.
-5. **Signature records** are kept in a private ASPEC repository. Each record holds your GitHub account ID, the agreement version and hash, your comment and timestamps.
-
-One signature covers all your future contributions to ASPEC projects that use the same agreement version.
+When you open a pull request, every contributor (the PR author, each commit author and each `Co-authored-by:` identity) is checked automatically. Anyone who has not signed is given a link to review and sign the agreement. Pull requests can only be merged once every contributor is covered. Signature records are kept privately by ASPEC, never in this public repository.
