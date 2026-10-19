@@ -1,0 +1,475 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 -->
+<Window
+    x:Class="TreeDock.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:c="using:TreeDock.Controls"
+    xmlns:local="using:TreeDock"
+    Title="TreeDock">
+
+    <Window.SystemBackdrop>
+        <MicaBackdrop />
+    </Window.SystemBackdrop>
+
+    <Grid x:Name="RootGrid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.Resources>
+            <Style x:Key="HeaderButton" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Padding" Value="4,2" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="HorizontalAlignment" Value="Stretch" />
+            </Style>
+            <Style x:Key="Panel" TargetType="Grid">
+                <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+                <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+            </Style>
+            <Style x:Key="CompactItem" TargetType="ListViewItem" BasedOn="{StaticResource DefaultListViewItemStyle}">
+                <Setter Property="MinHeight" Value="26" />
+                <Setter Property="Padding" Value="8,0,8,0" />
+                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            </Style>
+        </Grid.Resources>
+
+        <!-- Row 0: title bar (drag region) -->
+        <Grid x:Name="TitleBar" Height="34" Padding="14,0,140,0" ColumnSpacing="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Image Source="ms-appx:///Assets/TreeDock.ico" Width="16" Height="16" VerticalAlignment="Center" />
+            <TextBlock x:Name="TitleText" Grid.Column="1" Text="TreeDock" Style="{StaticResource CaptionTextBlockStyle}" VerticalAlignment="Center" />
+        </Grid>
+
+        <!-- Row 1: toolbar -->
+        <CommandBar x:Name="Commands" Grid.Row="1" Margin="4,0,0,0" DefaultLabelPosition="Right" HorizontalAlignment="Left" Background="Transparent" IsDynamicOverflowEnabled="True">
+            <AppBarButton x:Name="StopButton" Label="Stop" Click="Stop_Click" IsEnabled="False" ToolTipService.ToolTip="Stop the scan; results so far are kept (Esc)">
+                <AppBarButton.Icon><FontIcon Glyph="&#xE71A;" /></AppBarButton.Icon>
+                <AppBarButton.KeyboardAccelerators><KeyboardAccelerator Key="Escape" /></AppBarButton.KeyboardAccelerators>
+            </AppBarButton>
+            <AppBarToggleButton x:Name="PauseButton" Label="Pause" Click="Pause_Click" IsEnabled="False">
+                <AppBarToggleButton.Icon><FontIcon Glyph="&#xE769;" /></AppBarToggleButton.Icon>
+            </AppBarToggleButton>
+            <AppBarButton x:Name="RefreshButton" Label="Refresh" Click="Refresh_Click" IsEnabled="False" ToolTipService.ToolTip="Scan the same location again (F5)">
+                <AppBarButton.Icon><FontIcon Glyph="&#xE72C;" /></AppBarButton.Icon>
+                <AppBarButton.KeyboardAccelerators><KeyboardAccelerator Key="F5" /></AppBarButton.KeyboardAccelerators>
+            </AppBarButton>
+            <AppBarSeparator />
+            <AppBarToggleButton x:Name="ModeSize" Label="Size" Click="Mode_Click" Tag="Size" ToolTipService.ToolTip="Show logical size in the folder tree">
+                <AppBarToggleButton.Icon><FontIcon Glyph="&#xE8B9;" /></AppBarToggleButton.Icon>
+            </AppBarToggleButton>
+            <AppBarToggleButton x:Name="ModeAllocated" Label="Allocated" Click="Mode_Click" Tag="Allocated" IsChecked="True" ToolTipService.ToolTip="Show space used on disk in the folder tree">
+                <AppBarToggleButton.Icon><FontIcon Glyph="&#xEDA2;" /></AppBarToggleButton.Icon>
+            </AppBarToggleButton>
+            <AppBarToggleButton x:Name="ModeFiles" Label="Files" Click="Mode_Click" Tag="Files" ToolTipService.ToolTip="Show number of files in the folder tree">
+                <AppBarToggleButton.Icon><FontIcon Glyph="&#xE8A5;" /></AppBarToggleButton.Icon>
+            </AppBarToggleButton>
+            <AppBarToggleButton x:Name="ModePercent" Label="Percent" Click="Mode_Click" Tag="Percent" ToolTipService.ToolTip="Show share of the parent folder in the folder tree">
+                <AppBarToggleButton.Icon><FontIcon Glyph="&#xEB05;" /></AppBarToggleButton.Icon>
+            </AppBarToggleButton>
+            <AppBarButton x:Name="UnitButton" Label="Unit: Auto">
+                <AppBarButton.Icon><FontIcon Glyph="&#xE9E9;" /></AppBarButton.Icon>
+                <AppBarButton.Flyout>
+                    <MenuFlyout>
+                        <RadioMenuFlyoutItem Text="Automatic" GroupName="unit" IsChecked="True" Click="Unit_Click" Tag="Auto" />
+                        <RadioMenuFlyoutItem Text="GB" GroupName="unit" Click="Unit_Click" Tag="GB" />
+                        <RadioMenuFlyoutItem Text="MB" GroupName="unit" Click="Unit_Click" Tag="MB" />
+                        <RadioMenuFlyoutItem Text="KB" GroupName="unit" Click="Unit_Click" Tag="KB" />
+                    </MenuFlyout>
+                </AppBarButton.Flyout>
+            </AppBarButton>
+            <AppBarSeparator />
+            <AppBarButton x:Name="ExportButton" Label="Export" IsEnabled="False">
+                <AppBarButton.Icon><FontIcon Glyph="&#xEDE1;" /></AppBarButton.Icon>
+                <AppBarButton.Flyout>
+                    <MenuFlyout>
+                        <MenuFlyoutItem Text="CSV (spreadsheet)…" Click="ExportCsv_Click" />
+                        <MenuFlyoutItem Text="JSON…" Click="ExportJson_Click" />
+                        <MenuFlyoutSeparator />
+                        <MenuFlyoutItem Text="Save scan snapshot…" Click="SaveSnapshot_Click" />
+                    </MenuFlyout>
+                </AppBarButton.Flyout>
+            </AppBarButton>
+            <AppBarButton Label="Open scan" Click="OpenSnapshot_Click" ToolTipService.ToolTip="Open a saved scan snapshot">
+                <AppBarButton.Icon><FontIcon Glyph="&#xE8E5;" /></AppBarButton.Icon>
+            </AppBarButton>
+            <AppBarSeparator />
+            <AppBarButton x:Name="ElevateButton" Label="Run as admin" Click="Elevate_Click" ToolTipService.ToolTip="Restart with administrator rights: fast NTFS scan and access to protected folders">
+                <AppBarButton.Icon><FontIcon Glyph="&#xE7EF;" /></AppBarButton.Icon>
+            </AppBarButton>
+            <CommandBar.SecondaryCommands>
+                <AppBarButton Label="About TreeDock" Click="About_Click">
+                    <AppBarButton.Icon><FontIcon Glyph="&#xE946;" /></AppBarButton.Icon>
+                </AppBarButton>
+            </CommandBar.SecondaryCommands>
+        </CommandBar>
+
+        <!-- Row 2: navigation + path bar + summary -->
+        <Grid Grid.Row="2" Padding="12,2,12,6" ColumnSpacing="6">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="3*" MinWidth="260" MaxWidth="640" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="4*" />
+            </Grid.ColumnDefinitions>
+            <Button x:Name="BackButton" Click="Back_Click" IsEnabled="False" AutomationProperties.Name="Back" ToolTipService.ToolTip="Back (Alt+Left)" Padding="8,6">
+                <Button.KeyboardAccelerators><KeyboardAccelerator Modifiers="Menu" Key="Left" /></Button.KeyboardAccelerators>
+                <FontIcon Glyph="&#xE72B;" FontSize="14" />
+            </Button>
+            <Button x:Name="ForwardButton" Grid.Column="1" Click="Forward_Click" IsEnabled="False" AutomationProperties.Name="Forward" ToolTipService.ToolTip="Forward (Alt+Right)" Padding="8,6">
+                <Button.KeyboardAccelerators><KeyboardAccelerator Modifiers="Menu" Key="Right" /></Button.KeyboardAccelerators>
+                <FontIcon Glyph="&#xE72A;" FontSize="14" />
+            </Button>
+            <Button x:Name="UpButton" Grid.Column="2" Click="Up_Click" IsEnabled="False" AutomationProperties.Name="Up one level" ToolTipService.ToolTip="Up one level (Alt+Up)" Padding="8,6">
+                <Button.KeyboardAccelerators><KeyboardAccelerator Modifiers="Menu" Key="Up" /></Button.KeyboardAccelerators>
+                <FontIcon Glyph="&#xE74A;" FontSize="14" />
+            </Button>
+            <ComboBox x:Name="PathBox" Grid.Column="3" IsEditable="True" HorizontalAlignment="Stretch"
+                      PlaceholderText="Drive or folder to analyse, e.g. C:\ or C:\Users"
+                      TextSubmitted="PathBox_TextSubmitted" DropDownOpened="PathBox_DropDownOpened"
+                      AutomationProperties.Name="Scan target">
+                <ComboBox.KeyboardAccelerators>
+                    <KeyboardAccelerator Modifiers="Control" Key="L" Invoked="FocusPath_Invoked" />
+                </ComboBox.KeyboardAccelerators>
+            </ComboBox>
+            <Button x:Name="ScanButton" Grid.Column="4" Style="{StaticResource AccentButtonStyle}" Click="ScanButton_Click" AutomationProperties.Name="Scan" ToolTipService.ToolTip="Scan (Enter)" Padding="12,6">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <FontIcon Glyph="&#xE768;" FontSize="14" />
+                    <TextBlock Text="Scan" />
+                </StackPanel>
+            </Button>
+            <Button Grid.Column="5" Click="Browse_Click" AutomationProperties.Name="Browse for a folder" ToolTipService.ToolTip="Browse for a folder" Padding="8,6">
+                <FontIcon Glyph="&#xE838;" FontSize="14" />
+            </Button>
+            <StackPanel x:Name="SummaryBar" Grid.Column="6" Orientation="Horizontal" Spacing="18" VerticalAlignment="Center" Margin="12,0,0,0">
+                <TextBlock><Run Text="Size:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" /> <Run x:Name="SumSize" FontWeight="SemiBold" /></TextBlock>
+                <TextBlock><Run Text="Allocated:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" /> <Run x:Name="SumAllocated" FontWeight="SemiBold" /></TextBlock>
+                <TextBlock><Run Text="Files:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" /> <Run x:Name="SumFiles" FontWeight="SemiBold" /></TextBlock>
+                <TextBlock><Run Text="Folders:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" /> <Run x:Name="SumFolders" FontWeight="SemiBold" /></TextBlock>
+                <TextBlock><Run Text="Modified:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" /> <Run x:Name="SumModified" FontWeight="SemiBold" /></TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <InfoBar x:Name="Info" Grid.Row="3" Margin="12,0,12,6" IsOpen="False" />
+
+        <!-- Row 4: main area -->
+        <Grid Grid.Row="4" Padding="12,0,12,4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="LeftColumn" Width="2*" MinWidth="300" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="3*" MinWidth="380" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Left: folder tree + drives -->
+            <Grid RowSpacing="8">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid Style="{StaticResource Panel}">
+                    <ListView x:Name="TreeList" SelectionMode="Extended" Padding="0,4,0,4"
+                              SelectionChanged="TreeList_SelectionChanged" DoubleTapped="TreeList_DoubleTapped"
+                              KeyDown="TreeList_KeyDown" RightTapped="List_RightTapped" Tapped="TreeList_Tapped"
+                              ContainerContentChanging="List_ContainerContentChanging"
+                              ItemContainerStyle="{StaticResource CompactItem}"
+                              AutomationProperties.Name="Folder tree">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="c:RowItem">
+                                <Grid Height="26" Margin="{x:Bind Indent}" ColumnSpacing="6" ToolTipService.ToolTip="{x:Bind Notes}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="14" />
+                                        <ColumnDefinition Width="80" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock FontFamily="{StaticResource SymbolThemeFontFamily}" FontSize="9" Text="{x:Bind Expander}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    <Grid Grid.Column="1" Height="18" VerticalAlignment="Center">
+                                        <Rectangle Width="{x:Bind TreeBarWidth}" HorizontalAlignment="Left" RadiusX="2" RadiusY="2" Fill="{ThemeResource TreeDockBarBrush}" />
+                                        <TextBlock Text="{x:Bind TreeValueText}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,4,0" Style="{StaticResource CaptionTextBlockStyle}" FontWeight="{x:Bind Weight}" />
+                                    </Grid>
+                                    <FontIcon Grid.Column="2" Glyph="{x:Bind Icon}" FontSize="14" Foreground="{x:Bind IconBrush}" />
+                                    <TextBlock Grid.Column="3" Text="{x:Bind Name}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" FontWeight="{x:Bind Weight}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                    <StackPanel x:Name="TreePlaceholder" VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="6" Margin="24">
+                        <FontIcon Glyph="&#xE721;" FontSize="28" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                        <TextBlock Text="Choose a drive or folder above and press Enter." TextWrapping="Wrap" TextAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </Grid>
+                <Grid Grid.Row="1" Style="{StaticResource Panel}" MaxHeight="220">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid Padding="16,6,16,6" ColumnSpacing="8" BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="72" />
+                            <ColumnDefinition Width="72" />
+                            <ColumnDefinition Width="96" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Drive" FontWeight="SemiBold" />
+                        <TextBlock Grid.Column="1" Text="Total" FontWeight="SemiBold" HorizontalAlignment="Right" />
+                        <TextBlock Grid.Column="2" Text="Free" FontWeight="SemiBold" HorizontalAlignment="Right" />
+                        <TextBlock Grid.Column="3" Text="% Free" FontWeight="SemiBold" Margin="6,0,0,0" />
+                    </Grid>
+                    <ListView x:Name="DrivesList" Grid.Row="1" SelectionMode="Single" IsItemClickEnabled="True" ItemClick="Drive_ItemClick"
+                              ItemContainerStyle="{StaticResource CompactItem}" AutomationProperties.Name="Drives">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="local:DriveRow">
+                                <Grid Height="26" ColumnSpacing="8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="72" />
+                                        <ColumnDefinition Width="72" />
+                                        <ColumnDefinition Width="96" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon Glyph="{x:Bind Glyph}" FontSize="14" />
+                                        <TextBlock Text="{x:Bind Title}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                    <TextBlock Grid.Column="1" Text="{x:Bind TotalText}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="2" Text="{x:Bind FreeSpaceText}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                    <Grid Grid.Column="3" Height="16" Margin="6,0,0,0" VerticalAlignment="Center" CornerRadius="3" BorderThickness="1" BorderBrush="{ThemeResource ControlStrongStrokeColorDefaultBrush}">
+                                        <Rectangle Width="{x:Bind FreeBarWidth}" HorizontalAlignment="Left" Fill="{x:Bind FreeBrush}" />
+                                        <TextBlock Text="{x:Bind FreePercentText}" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{StaticResource CaptionTextBlockStyle}" />
+                                    </Grid>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
+            </Grid>
+
+            <c:Splitter Grid.Column="1" />
+
+            <!-- Right: tabs -->
+            <Grid Grid.Column="2" Style="{StaticResource Panel}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <SelectorBar x:Name="Tabs" SelectionChanged="Tabs_SelectionChanged" Margin="4,2,4,0">
+                    <SelectorBarItem x:Name="TabChart" Text="Chart" IsSelected="True">
+                        <SelectorBarItem.Icon><FontIcon Glyph="&#xEB05;" /></SelectorBarItem.Icon>
+                    </SelectorBarItem>
+                    <SelectorBarItem x:Name="TabDetails" Text="Details">
+                        <SelectorBarItem.Icon><FontIcon Glyph="&#xE8FD;" /></SelectorBarItem.Icon>
+                    </SelectorBarItem>
+                    <SelectorBarItem x:Name="TabExtensions" Text="Extensions">
+                        <SelectorBarItem.Icon><FontIcon Glyph="&#xE8A5;" /></SelectorBarItem.Icon>
+                    </SelectorBarItem>
+                    <SelectorBarItem x:Name="TabTop" Text="Top files">
+                        <SelectorBarItem.Icon><FontIcon Glyph="&#xE8CB;" /></SelectorBarItem.Icon>
+                    </SelectorBarItem>
+                </SelectorBar>
+
+                <!-- Chart -->
+                <Grid x:Name="ChartPane" Grid.Row="1" Padding="8" RowSpacing="6">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <BreadcrumbBar x:Name="Breadcrumb" ItemClicked="Breadcrumb_ItemClicked" VerticalAlignment="Center" />
+                        <SelectorBar x:Name="ChartKind" Grid.Column="1" SelectionChanged="ChartKind_SelectionChanged">
+                            <SelectorBarItem x:Name="KindTreemap" Text="Treemap" IsSelected="True" />
+                            <SelectorBarItem x:Name="KindSunburst" Text="Sunburst" />
+                            <SelectorBarItem x:Name="KindBars" Text="Bars" />
+                        </SelectorBar>
+                    </Grid>
+                    <c:TreemapView x:Name="Treemap" Grid.Row="1" />
+                    <c:SunburstView x:Name="Sunburst" Grid.Row="1" Visibility="Collapsed" />
+                    <ListView x:Name="BarsList" Grid.Row="1" Visibility="Collapsed" SelectionMode="Single" DoubleTapped="BarsList_DoubleTapped" RightTapped="List_RightTapped"
+                              ItemContainerStyle="{StaticResource CompactItem}" AutomationProperties.Name="Largest items in this folder">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="local:BarRow">
+                                <Grid Height="30" ColumnSpacing="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="2*" />
+                                        <ColumnDefinition Width="3*" />
+                                        <ColumnDefinition Width="80" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="{x:Bind Icon}" FontSize="14" Foreground="{x:Bind IconBrush}" />
+                                        <TextBlock Text="{x:Bind Name}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                    <Grid Grid.Column="1" Height="16" VerticalAlignment="Center">
+                                        <Rectangle HorizontalAlignment="Left" RadiusX="3" RadiusY="3" Fill="{x:Bind BarBrush}" Width="{x:Bind BarWidth}" />
+                                    </Grid>
+                                    <TextBlock Grid.Column="2" Text="{x:Bind SizeText}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                    <TextBlock x:Name="ChartHint" Grid.Row="2" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               Text="Click to select · double-click a folder to open it · double-click a file to show it in File Explorer · right-click for more" />
+                </Grid>
+
+                <!-- Details -->
+                <Grid x:Name="DetailsPane" Grid.Row="1" Visibility="Collapsed">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid Padding="16,6,16,6" ColumnSpacing="8" BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" MinWidth="140" />
+                            <ColumnDefinition Width="76" />
+                            <ColumnDefinition Width="76" />
+                            <ColumnDefinition Width="64" />
+                            <ColumnDefinition Width="60" />
+                            <ColumnDefinition Width="100" />
+                            <ColumnDefinition Width="120" />
+                        </Grid.ColumnDefinitions>
+                        <Button x:Name="SortName" Content="Name" Style="{StaticResource HeaderButton}" HorizontalContentAlignment="Left" Click="Sort_Click" Tag="0" />
+                        <Button x:Name="SortSize" Grid.Column="1" Content="Size" Style="{StaticResource HeaderButton}" HorizontalContentAlignment="Right" Click="Sort_Click" Tag="1" ToolTipService.ToolTip="Logical size (file contents)" />
+                        <Button x:Name="SortAllocated" Grid.Column="2" Content="Allocated" Style="{StaticResource HeaderButton}" HorizontalContentAlignment="Right" Click="Sort_Click" Tag="2" ToolTipService.ToolTip="Space actually used on the drive" />
+                        <Button x:Name="SortFiles" Grid.Column="3" Content="Files" Style="{StaticResource HeaderButton}" HorizontalContentAlignment="Right" Click="Sort_Click" Tag="3" />
+                        <TextBlock Grid.Column="4" Text="Folders" FontWeight="SemiBold" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="5" Text="% of Parent" FontWeight="SemiBold" VerticalAlignment="Center" Margin="4,0" />
+                        <Button x:Name="SortModified" Grid.Column="6" Content="Last Modified" Style="{StaticResource HeaderButton}" HorizontalContentAlignment="Left" Click="Sort_Click" Tag="4" />
+                    </Grid>
+                    <ListView x:Name="DetailsList" Grid.Row="1" SelectionMode="Extended"
+                              DoubleTapped="DetailsList_DoubleTapped" RightTapped="List_RightTapped" KeyDown="DetailsList_KeyDown"
+                              ContainerContentChanging="List_ContainerContentChanging"
+                              ItemContainerStyle="{StaticResource CompactItem}" AutomationProperties.Name="Folder contents">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="c:RowItem">
+                                <Grid Height="26" ColumnSpacing="8" ToolTipService.ToolTip="{x:Bind Notes}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" MinWidth="140" />
+                                        <ColumnDefinition Width="76" />
+                                        <ColumnDefinition Width="76" />
+                                        <ColumnDefinition Width="64" />
+                                        <ColumnDefinition Width="60" />
+                                        <ColumnDefinition Width="100" />
+                                        <ColumnDefinition Width="120" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid ColumnSpacing="8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <FontIcon Glyph="{x:Bind Icon}" FontSize="14" Foreground="{x:Bind IconBrush}" />
+                                        <TextBlock Grid.Column="1" Text="{x:Bind Name}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                    </Grid>
+                                    <TextBlock Grid.Column="1" Text="{x:Bind SizeText}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="2" Text="{x:Bind AllocatedText}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="3" Text="{x:Bind FilesText}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="4" Text="{x:Bind FoldersText}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                    <Grid Grid.Column="5" Height="18" VerticalAlignment="Center" CornerRadius="3" BorderThickness="1" BorderBrush="{ThemeResource ControlStrongStrokeColorDefaultBrush}">
+                                        <Rectangle Width="{x:Bind DetailsBarWidth}" HorizontalAlignment="Left" Fill="{ThemeResource TreeDockBarBrush}" />
+                                        <TextBlock Text="{x:Bind PercentText}" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{StaticResource CaptionTextBlockStyle}" />
+                                    </Grid>
+                                    <TextBlock Grid.Column="6" Text="{x:Bind ModifiedText}" VerticalAlignment="Center" Style="{StaticResource CaptionTextBlockStyle}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
+
+                <!-- Extensions -->
+                <ListView x:Name="TypesList" Grid.Row="1" Visibility="Collapsed" SelectionMode="None" AutomationProperties.Name="File types"
+                          ItemContainerStyle="{StaticResource CompactItem}">
+                    <ListView.Header>
+                        <Grid Padding="16,6,16,6" ColumnSpacing="8" BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="22" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="90" />
+                                <ColumnDefinition Width="80" />
+                                <ColumnDefinition Width="110" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="1" Text="Extension" FontWeight="SemiBold" />
+                            <TextBlock Grid.Column="2" Text="Allocated" FontWeight="SemiBold" HorizontalAlignment="Right" />
+                            <TextBlock Grid.Column="3" Text="Files" FontWeight="SemiBold" HorizontalAlignment="Right" />
+                            <TextBlock Grid.Column="4" Text="Share" FontWeight="SemiBold" Margin="6,0,0,0" />
+                        </Grid>
+                    </ListView.Header>
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="local:ExtRow">
+                            <Grid Height="30" ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="22" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="90" />
+                                    <ColumnDefinition Width="80" />
+                                    <ColumnDefinition Width="110" />
+                                </Grid.ColumnDefinitions>
+                                <Rectangle Width="12" Height="12" RadiusX="2" RadiusY="2" Fill="{x:Bind Swatch}" VerticalAlignment="Center" />
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="{x:Bind Name}" />
+                                    <TextBlock Text="{x:Bind Category}" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                </StackPanel>
+                                <TextBlock Grid.Column="2" Text="{x:Bind SizeText}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="3" Text="{x:Bind FilesText}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                <Grid Grid.Column="4" Height="16" Margin="6,0,0,0" VerticalAlignment="Center" CornerRadius="3" BorderThickness="1" BorderBrush="{ThemeResource ControlStrongStrokeColorDefaultBrush}">
+                                    <Rectangle Width="{x:Bind BarWidth}" HorizontalAlignment="Left" Fill="{x:Bind Swatch}" Opacity="0.7" />
+                                    <TextBlock Text="{x:Bind PercentText}" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{StaticResource CaptionTextBlockStyle}" />
+                                </Grid>
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+
+                <!-- Top files -->
+                <ListView x:Name="TopList" Grid.Row="1" Visibility="Collapsed" SelectionMode="Extended" DoubleTapped="TopList_DoubleTapped" RightTapped="List_RightTapped" AutomationProperties.Name="Largest files"
+                          ItemContainerStyle="{StaticResource CompactItem}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="local:FileRow">
+                            <Grid Height="40" ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="90" />
+                                </Grid.ColumnDefinitions>
+                                <FontIcon Glyph="&#xE8A5;" FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="{x:Bind Name}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{x:Bind Folder}" TextTrimming="CharacterEllipsis" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                </StackPanel>
+                                <TextBlock Grid.Column="2" Text="{x:Bind SizeText}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>
+        </Grid>
+
+        <!-- Row 5: status bar -->
+        <Grid Grid.Row="5" Padding="16,4,16,6" ColumnSpacing="16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <ProgressRing x:Name="Busy" Width="16" Height="16" IsActive="False" />
+            <TextBlock x:Name="FreeText" Grid.Column="1" Style="{StaticResource CaptionTextBlockStyle}" VerticalAlignment="Center" />
+            <TextBlock x:Name="StatusText" Grid.Column="2" TextTrimming="CharacterEllipsis" Style="{StaticResource CaptionTextBlockStyle}" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite" />
+            <TextBlock x:Name="HoverText" Grid.Column="3" TextTrimming="CharacterEllipsis" MaxWidth="560" Style="{StaticResource CaptionTextBlockStyle}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+        </Grid>
+    </Grid>
+</Window>

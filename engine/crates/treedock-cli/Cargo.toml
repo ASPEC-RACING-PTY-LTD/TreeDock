@@ -1,0 +1,19 @@
+[package]
+name = "treedock-cli"
+description = "TreeDock command-line scanner and exporter (read-only)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "treedock-cli"
+path = "src/main.rs"
+
+[dependencies]
+treedock-core.workspace = true
+treedock-win.workspace = true
+treedock-ntfs.workspace = true
+clap.workspace = true
+serde_json.workspace = true

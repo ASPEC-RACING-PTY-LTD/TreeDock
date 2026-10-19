@@ -1,0 +1,49 @@
+# Dependency policy (MASTER_PLAN §11.2). TreeDock is distributed under
+# PolyForm Noncommercial 1.0.0 and may also be licensed commercially by
+# ASPEC RACING PTY LTD, so only permissive licences are allowed.
+
+[graph]
+targets = ["x86_64-pc-windows-msvc", "aarch64-pc-windows-msvc", "x86_64-unknown-linux-gnu"]
+
+[licenses]
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "BSL-1.0",
+    "ISC",
+    "Zlib",
+    "Unicode-3.0",
+    "Unicode-DFS-2016",
+    "Unlicense",
+    "CC0-1.0",
+]
+confidence-threshold = 0.9
+# Workspace crates carry the project licence.
+private = { ignore = true }
+
+[bans]
+multiple-versions = "warn"
+# The product must not contain network-capable code (MASTER_PLAN §8.4).
+deny = [
+    { name = "reqwest" },
+    { name = "hyper" },
+    { name = "ureq" },
+    { name = "curl" },
+    { name = "isahc" },
+    { name = "attohttpc" },
+    { name = "surf" },
+    { name = "tokio" },
+    { name = "openssl" },
+    { name = "native-tls" },
+    { name = "rustls" },
+]
+
+[advisories]
+yanked = "deny"
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"

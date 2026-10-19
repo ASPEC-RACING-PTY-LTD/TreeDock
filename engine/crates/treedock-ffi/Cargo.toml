@@ -1,0 +1,20 @@
+[package]
+name = "treedock-ffi"
+description = "C ABI for the TreeDock desktop UI (builds treedock_engine.dll)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+publish.workspace = true
+
+[lib]
+name = "treedock_engine"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+treedock-core.workspace = true
+treedock-ntfs.workspace = true
+treedock-win.workspace = true
+
+[build-dependencies]
+csbindgen = "1.9"

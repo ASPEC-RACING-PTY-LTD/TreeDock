@@ -1,0 +1,31 @@
+{
+  "$comment": "PactDock CLA enforcement for TreeDock (MASTER_PLAN 11.3-11.4). Reference: https://github.com/ASPEC-RACING-PTY-LTD/PactDock/blob/b1a8809e8c9b268af6bdcb6d0ebf6f34b9bee9a9/docs/CONFIGURATION.md. The agreements are ASPEC drafts pending legal review; the workflow stays disabled until the repository variable PACTDOCK_ENABLED is set to true.",
+  "rightsHolder": "ASPEC RACING PTY LTD",
+  "individual": {
+    "id": "aspec-icla",
+    "name": "ASPEC Individual Contributor Licence Agreement",
+    "version": "1.0",
+    "document": ".github/cla/ASPEC-ICLA-1.0.md",
+    "sha256": "412673f83d48cf34d75c8929c163b46a73cdc4d7ce4bffb99c3e8d7c1a98240c"
+  },
+  "entity": {
+    "id": "aspec-ecla",
+    "name": "ASPEC Entity Contributor Licence Agreement",
+    "version": "1.0",
+    "document": ".github/cla/ASPEC-ECLA-1.0.md",
+    "sha256": "388111cf73fb09bb772cc650915d3718dc710cc16177b7d29b8175c1a57863b3"
+  },
+  "storage": {
+    "$comment": "Private signature store shared by ASPEC projects. TreeDock is public, so records must not live in this repository.",
+    "repository": "ASPEC-RACING-PTY-LTD/cla-signatures",
+    "directory": "signatures"
+  },
+  "statusContext": "PactDock CLA",
+  "allowlist": {
+    "$comment": "Numeric account IDs only. 49699333 = dependabot[bot], 41898282 = github-actions[bot].",
+    "accountIds": [49699333, 41898282]
+  },
+  "coAuthors": true,
+  "committers": false,
+  "comment": true
+}

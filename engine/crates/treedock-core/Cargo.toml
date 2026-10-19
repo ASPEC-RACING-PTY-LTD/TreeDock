@@ -1,0 +1,18 @@
+[package]
+name = "treedock-core"
+description = "Platform-neutral tree store, aggregation, queries, layouts and persistence for TreeDock"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+publish.workspace = true
+
+[dependencies]
+crossbeam-channel.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+zstd.workspace = true
+xxhash-rust.workspace = true
+regex.workspace = true
+
+[dev-dependencies]

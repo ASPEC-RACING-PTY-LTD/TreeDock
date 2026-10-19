@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 -->
+<Application
+    x:Class="TreeDock.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+            </ResourceDictionary.MergedDictionaries>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Default">
+                    <SolidColorBrush x:Key="TreeDockFolderBrush" Color="#F0C060" />
+                    <SolidColorBrush x:Key="TreeDockBarBrush" Color="#5B8DEF" Opacity="0.55" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="TreeDockFolderBrush" Color="#D9A520" />
+                    <SolidColorBrush x:Key="TreeDockBarBrush" Color="#3B6FD8" Opacity="0.35" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="HighContrast">
+                    <SolidColorBrush x:Key="TreeDockFolderBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+                    <SolidColorBrush x:Key="TreeDockBarBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

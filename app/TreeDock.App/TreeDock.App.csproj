@@ -1,0 +1,69 @@
+<!-- SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 -->
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RootNamespace>TreeDock</RootNamespace>
+    <AssemblyName>TreeDock</AssemblyName>
+    <UseWinUI>true</UseWinUI>
+    <EnableMsixTooling>true</EnableMsixTooling>
+    <WindowsPackageType>None</WindowsPackageType>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <SelfContained>true</SelfContained>
+    <Platforms>x64;ARM64</Platforms>
+    <Platform Condition="'$(Platform)' == '' or '$(Platform)' == 'AnyCPU'">x64</Platform>
+    <RuntimeIdentifier Condition="'$(Platform)' == 'x64'">win-x64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="'$(Platform)' == 'ARM64'">win-arm64</RuntimeIdentifier>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\TreeDock.ico</ApplicationIcon>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>latest</LangVersion>
+    <Version>0.1.0</Version>
+    <Company>ASPEC RACING PTY LTD</Company>
+    <Product>TreeDock</Product>
+    <Copyright>Copyright (c) 2026 ASPEC RACING PTY LTD. Source-available under the PolyForm Noncommercial License 1.0.0.</Copyright>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <EngineProfile>release</EngineProfile>
+    <EngineDir>$(MSBuildThisFileDirectory)..\..\engine\</EngineDir>
+    <RustTarget Condition="'$(Platform)' == 'x64'"></RustTarget>
+    <RustTarget Condition="'$(Platform)' == 'ARM64'">aarch64-pc-windows-msvc</RustTarget>
+    <EngineOut Condition="'$(RustTarget)' == ''">$(EngineDir)target\$(EngineProfile)\</EngineOut>
+    <EngineOut Condition="'$(RustTarget)' != ''">$(EngineDir)target\$(RustTarget)\$(EngineProfile)\</EngineOut>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <PublishAot>true</PublishAot>
+    <PublishTrimmed>true</PublishTrimmed>
+    <!-- Symbols are published separately, not shipped in the portable folder. -->
+    <CopyOutputSymbolsToPublishDirectory>false</CopyOutputSymbolsToPublishDirectory>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Windows App SDK components actually used (the metapackage would also ship ~60 MB of AI/ML/Search runtimes). -->
+    <PackageReference Include="Microsoft.WindowsAppSDK.Base" Version="2.0.4" />
+    <PackageReference Include="Microsoft.WindowsAppSDK.Foundation" Version="2.3.12" />
+    <PackageReference Include="Microsoft.WindowsAppSDK.InteractiveExperiences" Version="2.1.9" />
+    <PackageReference Include="Microsoft.WindowsAppSDK.DWrite" Version="2.1.0" />
+    <PackageReference Include="Microsoft.WindowsAppSDK.WinUI" Version="2.3.9" />
+    <PackageReference Include="Microsoft.WindowsAppSDK.Runtime" Version="2.5.1" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2705" />
+    <PackageReference Include="Microsoft.Graphics.Win2D" Version="1.4.0" />
+  </ItemGroup>
+
+  <!-- Build the Rust engine (treedock_engine.dll) before the app. Set SkipEngineBuild=true to skip. -->
+  <Target Name="BuildEngine" BeforeTargets="BeforeBuild" Condition="'$(SkipEngineBuild)' != 'true'">
+    <Exec Command="cargo build --release -p treedock-ffi" WorkingDirectory="$(EngineDir)" Condition="'$(RustTarget)' == ''" />
+    <Exec Command="cargo build --release -p treedock-ffi --target $(RustTarget)" WorkingDirectory="$(EngineDir)" Condition="'$(RustTarget)' != ''" />
+  </Target>
+
+  <ItemGroup>
+    <None Include="$(EngineOut)treedock_engine.dll" Link="treedock_engine.dll" CopyToOutputDirectory="PreserveNewest" Visible="false" />
+    <Content Include="Assets\TreeDock.ico" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\LICENSE.md" Link="LICENSE.md" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\NOTICE" Link="NOTICE" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\THIRD_PARTY_NOTICES.md" Link="THIRD_PARTY_NOTICES.md" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

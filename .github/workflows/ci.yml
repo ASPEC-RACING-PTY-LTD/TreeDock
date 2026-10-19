@@ -1,0 +1,54 @@
+# Build, lint and test only. CLA enforcement lives in pactdock.yml
+# (MASTER_PLAN §11.4).
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: engine
+    steps:
+      - uses: actions/checkout@v4
+      - name: Toolchain
+        run: rustup show active-toolchain
+      - name: Format
+        run: cargo fmt --all --check
+      - name: Clippy
+        run: cargo clippy --all-targets --release --locked -- -D warnings
+      - name: Test
+        run: cargo test --release --locked
+      - name: Build CLI
+        run: cargo build --release --locked -p treedock-cli
+      - uses: actions/upload-artifact@v4
+        with:
+          name: treedock-cli-x64
+          path: engine/target/release/treedock-cli.exe
+
+  core-linux:
+    # The core crate is platform-neutral; testing it on Linux keeps it that way
+    # and is where the MFT parser fuzzing will run (MASTER_PLAN §10.1).
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: engine
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test core
+        run: cargo test -p treedock-core --locked
+
+  dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          manifest-path: engine/Cargo.toml

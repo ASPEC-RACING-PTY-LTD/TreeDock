@@ -1,0 +1,53 @@
+# PactDock CLA enforcement (MASTER_PLAN 11.4, milestone PD).
+# Based on https://github.com/ASPEC-RACING-PTY-LTD/PactDock/blob/b1a8809e8c9b268af6bdcb6d0ebf6f34b9bee9a9/examples/workflows/pactdock.yml
+#
+# Security notes (from PactDock's setup guide)
+# - pull_request_target and issue_comment always run this file from the DEFAULT
+#   BRANCH, so a pull request cannot alter it.
+# - There is deliberately no actions/checkout step: PactDock reads PR metadata
+#   through the API and never runs contributor code.
+# - PactDock is pinned to a full commit SHA (main as of 2026-10-20).
+#
+# Enablement: the job runs only when the repository (or organisation) variable
+# PACTDOCK_ENABLED is "true". Leave it unset until the ASPEC CLA drafts in
+# .github/cla/ have passed legal review.
+name: PactDock CLA
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+  issue_comment:
+    types: [created]
+  # Recheck open PRs daily (e.g. after someone signs on another ASPEC project).
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+    inputs:
+      pull-request:
+        description: Pull request number to recheck (blank = all open PRs)
+        required: false
+
+# GitHub App mode: PactDock uses the App's own repository-scoped tokens, so the
+# workflow token needs nothing beyond read access.
+permissions:
+  contents: read
+
+concurrency:
+  group: pactdock-${{ github.event.pull_request.number || github.event.issue.number || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  cla:
+    if: >-
+      vars.PACTDOCK_ENABLED == 'true' &&
+      (github.event_name != 'issue_comment' ||
+       (github.event.issue.pull_request &&
+        (contains(github.event.comment.body, 'agree to the') || contains(github.event.comment.body, '/pactdock'))))
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: ASPEC-RACING-PTY-LTD/PactDock@b1a8809e8c9b268af6bdcb6d0ebf6f34b9bee9a9 # main 2026-10-20 (v1.0.0)
+        with:
+          app-id: ${{ vars.PACTDOCK_APP_ID }}
+          app-private-key: ${{ secrets.PACTDOCK_APP_PRIVATE_KEY }}
+          pull-request: ${{ inputs.pull-request }}

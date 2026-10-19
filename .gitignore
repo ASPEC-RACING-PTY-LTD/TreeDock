@@ -1,0 +1,9 @@
+/engine/target/
+/target/
+bin/
+obj/
+*.user
+.vs/
+*.tdsnap
+/dist/
+*.bak
